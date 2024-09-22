@@ -16,9 +16,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.allclear.socialhub.auth.dto.UserDetailsImpl;
 import com.allclear.socialhub.common.exception.CustomException;
 import com.allclear.socialhub.common.exception.ErrorCode;
-import com.allclear.socialhub.common.provider.JwtTokenProvider;
+import com.allclear.socialhub.auth.util.AccessTokenUtil;
 import com.allclear.socialhub.user.domain.User;
 import com.allclear.socialhub.user.dto.UserInfoUpdateRequest;
 import com.allclear.socialhub.user.dto.UserInfoUpdateResponse;
@@ -41,7 +42,7 @@ public class UserServiceImplTest {
 	@InjectMocks
 	private UserServiceImpl userService;
 	@Mock
-	private JwtTokenProvider jwtTokenProvider;
+	private AccessTokenUtil accessTokenUtil;
 	@Mock
 	private PasswordEncoder passwordEncoder;
 	private UserJoinRequest request;
@@ -190,18 +191,15 @@ public class UserServiceImplTest {
 	public void updateUserInfo_Success() {
 		// given
 		String token = "validToken";
+		UserDetailsImpl userDetails = new UserDetailsImpl(user);
 		UserInfoUpdateRequest request = new UserInfoUpdateRequest("newUsername", "NewValidPass123!");
 
-		Claims claims = mock(Claims.class);
-		given(jwtTokenProvider.extractAllClaims(token)).willReturn(claims);
-		given(jwtTokenProvider.extractEmail(claims)).willReturn(user.getEmail());
-		given(jwtTokenProvider.extractUsername(claims)).willReturn(user.getUsername());
 		given(userRepository.findByEmailAndUsername(user.getEmail(), user.getUsername())).willReturn(Optional.of(user));
 		given(passwordEncoder.matches(request.getPassword(), user.getPassword())).willReturn(false);
 		given(passwordEncoder.encode(request.getPassword())).willReturn("encodedNewPassword");
 
 		// when
-		UserInfoUpdateResponse response = userService.updateUserInfo(request, token);
+		UserInfoUpdateResponse response = userService.updateUserInfo(request, userDetails);
 
 		// then
 		verify(userRepository, times(1)).save(any(User.class));
@@ -213,19 +211,15 @@ public class UserServiceImplTest {
 	@DisplayName("회원 정보 수정 실패 테스트 - 기존 비밀번호 재사용")
 	public void updateUserInfo_Failure_PasswordReused() {
 		// given
-		String token = "validToken";
 		UserInfoUpdateRequest request = new UserInfoUpdateRequest("newUsername", "NewValidPass123!");
+		UserDetailsImpl userDetails = new UserDetailsImpl(user);
 
-		Claims claims = mock(Claims.class);
-		given(jwtTokenProvider.extractAllClaims(token)).willReturn(claims);
-		given(jwtTokenProvider.extractEmail(claims)).willReturn(user.getEmail());
-		given(jwtTokenProvider.extractUsername(claims)).willReturn(user.getUsername());
 		given(userRepository.findByEmailAndUsername(user.getEmail(), user.getUsername())).willReturn(Optional.of(user));
 		given(passwordEncoder.matches(request.getPassword(), user.getPassword())).willReturn(true);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-				() -> userService.updateUserInfo(request, token));
+				() -> userService.updateUserInfo(request, userDetails));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PASSWORD_REUSED);
 		verify(userRepository, never()).save(any(User.class));
@@ -235,16 +229,12 @@ public class UserServiceImplTest {
 	@DisplayName("회원 정보 수정 실패 테스트 - 사용자 존재하지 않음")
 	public void updateUserInfo_Failure_UserNotExist() {
 		// given
-		String token = "validToken";
 		UserInfoUpdateRequest request = new UserInfoUpdateRequest("newUsername", "NewValidPass123!");
+		UserDetailsImpl userDetails = new UserDetailsImpl(user);
 
-		Claims claims = mock(Claims.class);
-		given(jwtTokenProvider.extractAllClaims(token)).willReturn(claims);
-		given(jwtTokenProvider.extractEmail(claims)).willReturn(user.getEmail());
-		given(jwtTokenProvider.extractUsername(claims)).willReturn(user.getUsername());
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-				() -> userService.updateUserInfo(request, token));
+				() -> userService.updateUserInfo(request, userDetails));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_EXIST);
 		verify(userRepository, never()).save(any(User.class));

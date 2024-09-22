@@ -248,6 +248,11 @@
 <p></p>
 
 - [😅 **5. 목(Mock) 객체 사용 및 테스트 코드 작성에 어려움**](https://github.com/wanted-all-clear/socialhub/blob/dev/readme/trouble/%EB%AA%A9(Mock)_%EA%B0%9D%EC%B2%B4_%EC%82%AC%EC%9A%A9_%EB%B0%8F_%ED%85%8C%EC%8A%A4%ED%8A%B8_%EC%BD%94%EB%93%9C_%EC%9E%91%EC%84%B1_%EC%9D%B4%ED%95%B4_%EB%B6%80%EC%A1%B1.md)
+
+<p></p>
+
+- [😮‍💨 **6. JWT 제대로 적용하기**](https://github.com/rladmswjd119/socialhub/blob/dev/readme/trouble/JWT_FILTER_%EC%A0%81%EC%9A%A9)
+
 <br>
 
 ## 디렉토리 구조

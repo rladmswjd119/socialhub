@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -25,9 +26,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.allclear.socialhub.auth.dto.UserDetailsImpl;
+import com.allclear.socialhub.auth.util.AccessTokenUtil;
 import com.allclear.socialhub.common.exception.CustomException;
 import com.allclear.socialhub.common.exception.ErrorCode;
-import com.allclear.socialhub.common.provider.JwtTokenProvider;
 import com.allclear.socialhub.user.controller.UserController;
 import com.allclear.socialhub.user.domain.User;
 import com.allclear.socialhub.user.dto.UserEmailRequest;
@@ -53,7 +55,10 @@ public class UserControllerTest {
 	private TestRestTemplate testRestTemplate;
 
 	@Autowired
-	private JwtTokenProvider jwtTokenProvider;
+	private AccessTokenUtil accessTokenUtil;
+
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 
 	@MockBean
 	private EmailService emailService;
@@ -68,8 +73,8 @@ public class UserControllerTest {
 	private UserController userController;
 
 	public String username = "popcorn23";
-	public String email = "wpdls879@gmail.com";
-	public String password = "qlalfqjsghgh23";
+	public String email = "popcorn23@test.com";
+	public String password = "qlalfqjsgh23";
 	private User user;
 	private String jwt;
 
@@ -77,6 +82,7 @@ public class UserControllerTest {
 	void setUp() {
 
 		MockitoAnnotations.openMocks(this);
+		redisTemplate.delete(username);
 
 		// 회원가입
 		UserJoinRequest userJoinRequest = new UserJoinRequest(username, email, password);
@@ -86,13 +92,13 @@ public class UserControllerTest {
 
 		// User 객체 사용해 JWT 토큰 생성
 		user = User.builder()
-				.id(1L)
-				.email("fkznsha23@gmail.com")
+				.email(email)
 				.password(password)
-				.username(username).build();
+				.username(username)
+				.build();
 
 		// jwtTokenProvider를 사용해 JWT 토큰 생성
-		jwt = jwtTokenProvider.createToken(user);
+		jwt = accessTokenUtil.createToken(user.getUsername());
 	}
 
 	@Test
@@ -107,10 +113,9 @@ public class UserControllerTest {
 		ResponseEntity<String> responseEntity = testRestTemplate.exchange("/api/users/login", HttpMethod.POST,
 				httpEntity, String.class);
 
-		String jwtToken = responseEntity.getHeaders().getFirst("AUTHORIZATION");
-		Claims token = jwtTokenProvider.extractAllClaims(jwtToken);
-		String email = jwtTokenProvider.extractEmail(token);
-		String tokenStr = jwtTokenProvider.extractUsername(token);
+		String jwtToken = responseEntity.getHeaders().getFirst("Authorization");
+		Claims token = accessTokenUtil.getClaims(jwtToken);
+		String tokenStr = accessTokenUtil.extractUsername(token);
 
 		assertThat(userLoginRequest.getUsername()).isEqualTo(tokenStr);
 		assertThat(this.email).isEqualTo(email);
@@ -144,13 +149,12 @@ public class UserControllerTest {
 	@DisplayName("이메일 인증 코드 전송이 성공적으로 이루어지는지 테스트합니다.")
 	void sendEmailVerification_Success() throws Exception {
 		// given
-		String validJwt = jwtTokenProvider.createToken(user);
+		String validJwt = accessTokenUtil.createToken(user.getUsername());
 
 		// JwtTokenProvider를 완전히 모킹하여 특정 메서드 스터빙
-		JwtTokenProvider mockJwtTokenProvider = mock(JwtTokenProvider.class);
+		AccessTokenUtil mockAccessTokenUtil = mock(AccessTokenUtil.class);
 
-		when(mockJwtTokenProvider.extractAllClaims(validJwt)).thenReturn(mockClaims);
-		when(mockJwtTokenProvider.extractEmail(mockClaims)).thenReturn(user.getEmail());
+		when(mockAccessTokenUtil.getClaims(validJwt)).thenReturn(mockClaims);
 
 		doNothing().when(emailService).sendEmail(user.getEmail(), EmailType.VERIFICATION);
 
@@ -171,12 +175,12 @@ public class UserControllerTest {
 		// given
 		user = User.builder()
 				.id(1L)
-				.email("wpdls879@gmail.com")
-				.username("popcorn23")
-				.password("qlalfqjsghgh23")
+				.email(email)
+				.username(username)
+				.password(password)
 				.build();
 
-		String validJwt = jwtTokenProvider.createToken(user);
+		String validJwt = accessTokenUtil.createToken(user.getUsername());
 
 		// 이메일 전송 시 예외가 발생하도록 설정
 		doThrow(new MessagingException("이메일 전송 실패")).when(emailService)
@@ -198,13 +202,14 @@ public class UserControllerTest {
 		String email = "user@example.com"; // 테스트용 이메일
 		String authCode = "123456"; // 테스트용 인증 코드
 		UserEmailRequest request = new UserEmailRequest(authCode); // 인증 코드 요청 객체 생성
+		UserDetailsImpl userDetails = mock(UserDetailsImpl.class);
 
 		// JwtTokenProvider를 완전히 모킹하여 특정 메서드 스터빙
-		JwtTokenProvider mockJwtTokenProvider = mock(JwtTokenProvider.class);
+		AccessTokenUtil mockAccessTokenUtil = mock(AccessTokenUtil.class);
 
 		// JWT 토큰에서 이메일을 추출하도록 모킹 설정
-		when(mockJwtTokenProvider.extractEmail(any(Claims.class))).thenReturn(email);
-		when(mockJwtTokenProvider.extractAllClaims(token)).thenReturn(mockClaims);
+		// when(mockAccessTokenUtil.extractEmail(any(Claims.class))).thenReturn(email);
+		when(mockAccessTokenUtil.getClaims(token)).thenReturn(mockClaims);
 
 		// emailService.getVerificationToken()이 잘못된 인증 코드를 반환하도록 모킹 설정
 		when(emailService.getVerificationToken(email)).thenReturn("wrongCode");
@@ -213,10 +218,10 @@ public class UserControllerTest {
 		when(userService.verifyUser("wrongCode", authCode, email)).thenReturn(false);
 
 		// JwtTokenProvider를 사용한 UserController 인스턴스 생성
-		UserController userController = new UserController(emailService, userService, mockJwtTokenProvider);
+		UserController userController = new UserController(emailService, userService, mockAccessTokenUtil);
 
 		// when
-		ResponseEntity<String> response = userController.verifyEmailCode(token, request);
+		ResponseEntity<String> response = userController.verifyEmailCode(userDetails, request);
 
 		// then
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()); // 상태 코드가 400 BAD_REQUEST인지 확인

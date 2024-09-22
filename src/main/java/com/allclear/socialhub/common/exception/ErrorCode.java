@@ -35,7 +35,8 @@ public enum ErrorCode {
     // JWT
     INVALID_JWT_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 JWT 토큰입니다."),
     JWT_CLAIMS_EMPTY(HttpStatus.BAD_REQUEST, "JWT 클레임이 비어 있습니다."),
-    EXPIRED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "만료된 JWT 토큰입니다.");
+    EXPIRED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "만료된 JWT 토큰입니다."),
+    EXIST_REFRESH_TOKEN(HttpStatus.CONFLICT, "이미 Refresh Token이 존재합니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

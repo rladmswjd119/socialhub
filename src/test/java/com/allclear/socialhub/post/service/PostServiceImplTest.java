@@ -461,7 +461,7 @@ class PostServiceImplTest {
         assertThat(getDetail.getTitle()).isEqualTo(post.getTitle());
         assertThat(getDetail.getContent()).isEqualTo(post.getContent());
         assertThat(getDetail.getType()).isEqualTo(post.getType());
-        assertThat(getDetail.getViewCnt()).isEqualTo(post.getViewCnt());
+        assertThat(getDetail.getViewCnt()).isEqualTo(post.getViewCnt() + 1);
         assertThat(getDetail.getLikeCnt()).isEqualTo(post.getLikeCnt());
         assertThat(getDetail.getShareCnt()).isEqualTo(post.getShareCnt());
     }

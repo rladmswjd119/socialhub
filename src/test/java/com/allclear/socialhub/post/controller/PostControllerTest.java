@@ -1,6 +1,6 @@
 package com.allclear.socialhub.post.controller;
 
-import com.allclear.socialhub.common.provider.JwtTokenProvider;
+import com.allclear.socialhub.auth.util.AccessTokenUtil;
 import com.allclear.socialhub.post.common.like.dto.PostLikeResponse;
 import com.allclear.socialhub.post.common.share.dto.PostShareResponse;
 import com.allclear.socialhub.post.dto.PostDetailResponse;
@@ -44,7 +44,7 @@ class PostControllerTest {
     private PostServiceImpl postService;
 
     @MockBean
-    private JwtTokenProvider jwtTokenProvider;
+    private AccessTokenUtil accessTokenUtil;
 
     private String jwt;
     private String username = "test";
@@ -56,8 +56,8 @@ class PostControllerTest {
     void setUp() {
 
         jwt = "mockJwtToken"; // 실제 JWT 생성 로직을 대체하는 Mock 값
-        when(jwtTokenProvider.extractAllClaims(anyString())).thenReturn(mockClaims);
-        when(jwtTokenProvider.extractUsername(any(Claims.class))).thenReturn("test");
+        when(accessTokenUtil.getClaims(anyString())).thenReturn(mockClaims);
+        when(accessTokenUtil.extractUsername(any(Claims.class))).thenReturn("test");
     }
 
     @DisplayName("게시물 목록을 조회합니다.")

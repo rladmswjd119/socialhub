@@ -1,9 +1,9 @@
 package com.allclear.socialhub.post.controller;
 
+import com.allclear.socialhub.auth.util.AccessTokenUtil;
 import com.allclear.socialhub.common.exception.CustomException;
 import com.allclear.socialhub.common.exception.ErrorCode;
 import com.allclear.socialhub.common.exception.handler.GlobalExceptionHandler;
-import com.allclear.socialhub.common.provider.JwtTokenProvider;
 import com.allclear.socialhub.post.domain.StatisticType;
 import com.allclear.socialhub.post.domain.StatisticValue;
 import com.allclear.socialhub.post.dto.StatisticResponse;
@@ -49,7 +49,7 @@ class StatisticControllerTest {
     private StatisticService statisticService;
 
     @MockBean
-    private JwtTokenProvider jwtTokenProvider;
+    private AccessTokenUtil accessTokenUtil;
 
     @Mock
     private Claims mockClaims;
@@ -64,8 +64,8 @@ class StatisticControllerTest {
                 .build();
 
         jwt = "mockJwtToken"; // 실제 JWT 생성 로직을 대체하는 Mock 값
-        when(jwtTokenProvider.extractAllClaims(anyString())).thenReturn(mockClaims);
-        when(jwtTokenProvider.extractUsername(any(Claims.class))).thenReturn("test");
+        when(accessTokenUtil.getClaims(anyString())).thenReturn(mockClaims);
+        when(accessTokenUtil.extractUsername(any(Claims.class))).thenReturn("test");
     }
 
     @Nested

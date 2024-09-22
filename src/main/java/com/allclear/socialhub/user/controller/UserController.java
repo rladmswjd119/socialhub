@@ -1,13 +1,14 @@
 package com.allclear.socialhub.user.controller;
 
+import org.springframework.http.HttpHeaders;
+
+import com.allclear.socialhub.auth.dto.UserDetailsImpl;
 import com.allclear.socialhub.common.exception.CustomException;
-import com.allclear.socialhub.common.provider.JwtTokenProvider;
-import com.allclear.socialhub.user.domain.User;
+import com.allclear.socialhub.auth.util.AccessTokenUtil;
 import com.allclear.socialhub.user.dto.*;
 import com.allclear.socialhub.user.service.EmailService;
 import com.allclear.socialhub.user.service.UserService;
 import com.allclear.socialhub.user.type.EmailType;
-import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +19,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,7 +30,7 @@ public class UserController {
 
     private final EmailService emailService;
     private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final AccessTokenUtil accessTokenUtil;
 
     @Operation(summary = "이메일 인증 코드 전송", description = "사용자의 이메일로 인증 코드를 전송합니다.")
     @ApiResponses(value = {
@@ -38,12 +40,10 @@ public class UserController {
                     content = @Content)
     })
     @PostMapping("/email-code")
-    public ResponseEntity<String> sendEmailVerification(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<String> sendEmailVerification(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         try {
-            Claims claims = jwtTokenProvider.extractAllClaims(token);
-            String email = jwtTokenProvider.extractEmail(claims);
-
+            String email = userDetails.getEmail();
             emailService.sendEmail(email, EmailType.VERIFICATION);
             return ResponseEntity.status(HttpStatus.OK).body("이메일로 인증 코드가 전송되었습니다.");
 
@@ -61,11 +61,10 @@ public class UserController {
                     content = @Content)
     })
     @PostMapping("/email-verify")
-    public ResponseEntity<String> verifyEmailCode(@RequestHeader("Authorization") String token,
+    public ResponseEntity<String> verifyEmailCode(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @Valid @RequestBody UserEmailRequest request) {
 
-        Claims claims = jwtTokenProvider.extractAllClaims(token);
-        String email = jwtTokenProvider.extractEmail(claims);
+        String email = userDetails.getEmail();
         String storedCode = emailService.getVerificationToken(email);
 
         if (userService.verifyUser(storedCode, request.getAuthCode(), email)) {
@@ -104,12 +103,11 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/login")
-    public ResponseEntity<String> userLogin(@RequestBody UserLoginRequest request) {
+    public ResponseEntity<String> userLogin(@Valid @RequestBody UserLoginRequest request) {
 
-        User user = userService.userLogin(request);
-        String jwtToken = jwtTokenProvider.createToken(user);
+        HttpHeaders httpHeaders = userService.userLogin(request);
 
-        return ResponseEntity.ok().header("Authorization", jwtToken).body("로그인이 완료되었습니다.");
+        return ResponseEntity.ok().headers(httpHeaders).body("로그인이 완료되었습니다.");
     }
 
     @Operation(summary = "계정 중복 체크", description = "사용자가 계정 중복 체크를 요청합니다.")
@@ -135,10 +133,10 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.")
     })
     public ResponseEntity<UserInfoUpdateResponse> updateUserInfo(
-            @RequestHeader("Authorization") String token,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @Valid @RequestBody UserInfoUpdateRequest request) {
 
-        UserInfoUpdateResponse response = userService.updateUserInfo(request, token);
+        UserInfoUpdateResponse response = userService.updateUserInfo(request, userDetails);
 
         return ResponseEntity.status(200).body(response);
     }

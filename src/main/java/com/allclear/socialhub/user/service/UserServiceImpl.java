@@ -1,12 +1,15 @@
 package com.allclear.socialhub.user.service;
 
+import org.springframework.http.HttpHeaders;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.allclear.socialhub.auth.dto.UserDetailsImpl;
+import com.allclear.socialhub.auth.service.AuthService;
 import com.allclear.socialhub.common.config.WebSecurityConfig;
 import com.allclear.socialhub.common.exception.CustomException;
 import com.allclear.socialhub.common.exception.ErrorCode;
-import com.allclear.socialhub.common.provider.JwtTokenProvider;
 import com.allclear.socialhub.user.domain.User;
 import com.allclear.socialhub.user.dto.UserInfoUpdateRequest;
 import com.allclear.socialhub.user.dto.UserInfoUpdateResponse;
@@ -19,9 +22,10 @@ import com.allclear.socialhub.user.type.UserCertifyStatus;
 import com.allclear.socialhub.user.type.UserStatus;
 import com.allclear.socialhub.user.type.UsernameDupStatus;
 
-import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -30,7 +34,7 @@ public class UserServiceImpl implements UserService {
 	private final EmailRedisRepository emailRedisRepository;
 	private final WebSecurityConfig securityConfig;
 	private final PasswordEncoder passwordEncoder;
-	private final JwtTokenProvider jwtTokenProvider;
+	private final AuthService authService;
 
 	/**
 	 * 사용자 회원가입
@@ -136,17 +140,16 @@ public class UserServiceImpl implements UserService {
 	 *
 	 * @param request
 	 */
-	public User userLogin(UserLoginRequest request) {
+	public HttpHeaders userLogin(UserLoginRequest request) {
+		log.info("username : {}", request.getUsername());
+		User user = userRepository.findByUsername(request.getUsername());
 
-		User user = getUserByUsername(request.getUsername());
-
-		if (user == null) {
+		if(user == null) {
 			throw new CustomException(ErrorCode.USER_NOT_EXIST);
 		}
-
 		checkPassword(user, request.getPassword());
 
-		return user;
+		return authService.createHeaders(request.getUsername());
 	}
 
 	/**
@@ -179,7 +182,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 * 비밀번호 확인
+	 * 비밀번호 확인!
 	 * 작성자 : 김은정
 	 *
 	 * @param user
@@ -195,15 +198,14 @@ public class UserServiceImpl implements UserService {
 
 	/**
 	 * @param request 사용자 회원정보 수정한 데이터
-	 * @param token   JWT token
+	 * @param userDetails   로그인한 회원정보
 	 * @return Response 객체
 	 */
 	@Override
-	public UserInfoUpdateResponse updateUserInfo(UserInfoUpdateRequest request, String token) {
+	public UserInfoUpdateResponse updateUserInfo(UserInfoUpdateRequest request, UserDetailsImpl userDetails) {
 		// 1. 토큰에서 이메일과 계정명을 추출
-		Claims claims = jwtTokenProvider.extractAllClaims(token);
-		String email = jwtTokenProvider.extractEmail(claims);
-		String username = jwtTokenProvider.extractUsername(claims);
+		String email = userDetails.getEmail();
+		String username = userDetails.getUsername();
 
 		// 2. 이메일과 계정명을 사용해 사용자 검색
 		User user = userRepository.findByEmailAndUsername(email, username)
