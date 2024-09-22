@@ -182,7 +182,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 * 비밀번호 확인
+	 * 비밀번호 확인!
 	 * 작성자 : 김은정
 	 *
 	 * @param user
