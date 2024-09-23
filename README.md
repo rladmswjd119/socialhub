@@ -251,8 +251,6 @@
 
 <p></p>
 
-- [😮‍💨 **6. JWT 제대로 적용하기**](https://github.com/rladmswjd119/socialhub/blob/dev/readme/trouble/JWT_FILTER_%EC%A0%81%EC%9A%A9)
-
 <br>
 
 ## 디렉토리 구조
