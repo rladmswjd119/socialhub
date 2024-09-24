@@ -232,22 +232,22 @@
 <br>
 
 ## 트러블 슈팅
-- [💥 **1. JWT 토큰 시크릿 키 보안 오류**](https://github.com/wanted-all-clear/socialhub/blob/dev/readme/trouble/JWT_%ED%86%A0%ED%81%B0_%EC%8B%9C%ED%81%AC%EB%A6%BF_%ED%82%A4_%EB%B3%B4%EC%95%88_%EC%98%A4%EB%A5%98.md)  
+- [💥 **1. JWT 토큰 시크릿 키 보안 오류**](https://github.com/rladmswjd119/socialhub/blob/dev/readme/trouble/JWT_%ED%86%A0%ED%81%B0_%EC%8B%9C%ED%81%AC%EB%A6%BF_%ED%82%A4_%EB%B3%B4%EC%95%88_%EC%98%A4%EB%A5%98.md)  
 
 <p></p>
 
-- [🤔 **2. MultiValueMap으로 인한 415 UNSUPPORTED_MEDIA_TYPE 오류**](https://github.com/wanted-all-clear/socialhub/blob/dev/readme/trouble/MultiValueMap_415_ERROR.md)
+- [🤔 **2. MultiValueMap으로 인한 415 UNSUPPORTED_MEDIA_TYPE 오류**](https://github.com/rladmswjd119/socialhub/blob/dev/readme/trouble/MultiValueMap_415_ERROR.md)
 
 <p></p>
 
-- [💦 **3. Querydsl 설정 관련 이슈**](https://github.com/wanted-all-clear/socialhub/blob/dev/readme/trouble/Querydsl_%EC%84%A4%EC%A0%95_%EA%B4%80%EB%A0%A8_%EC%9D%B4%EC%8A%88.md)
+- [💦 **3. Querydsl 설정 관련 이슈**](https://github.com/rladmswjd119/socialhub/blob/dev/readme/trouble/Querydsl_%EC%84%A4%EC%A0%95_%EA%B4%80%EB%A0%A8_%EC%9D%B4%EC%8A%88.md)
 <p></p>
 
-- [🔥 **4. Enum의 유효성 검사 및 예외처리**](https://github.com/wanted-all-clear/socialhub/blob/dev/readme/trouble/Enum%EC%9D%98_%EC%9C%A0%ED%9A%A8%EC%84%B1_%EA%B2%80%EC%82%AC_%EB%B0%8F_%EC%98%88%EC%99%B8%EC%B2%98%EB%A6%AC.md)
+- [🔥 **4. Enum의 유효성 검사 및 예외처리**](https://github.com/rladmswjd119/socialhub/blob/dev/readme/trouble/Enum%EC%9D%98_%EC%9C%A0%ED%9A%A8%EC%84%B1_%EA%B2%80%EC%82%AC_%EB%B0%8F_%EC%98%88%EC%99%B8%EC%B2%98%EB%A6%AC.md)
 
 <p></p>
 
-- [😅 **5. 목(Mock) 객체 사용 및 테스트 코드 작성에 어려움**](https://github.com/wanted-all-clear/socialhub/blob/dev/readme/trouble/%EB%AA%A9(Mock)_%EA%B0%9D%EC%B2%B4_%EC%82%AC%EC%9A%A9_%EB%B0%8F_%ED%85%8C%EC%8A%A4%ED%8A%B8_%EC%BD%94%EB%93%9C_%EC%9E%91%EC%84%B1_%EC%9D%B4%ED%95%B4_%EB%B6%80%EC%A1%B1.md)
+- [😅 **5. 목(Mock) 객체 사용 및 테스트 코드 작성에 어려움**](https://github.com/rladmswjd119/socialhub/blob/dev/readme/trouble/%EB%AA%A9(Mock)_%EA%B0%9D%EC%B2%B4_%EC%82%AC%EC%9A%A9_%EB%B0%8F_%ED%85%8C%EC%8A%A4%ED%8A%B8_%EC%BD%94%EB%93%9C_%EC%9E%91%EC%84%B1_%EC%9D%B4%ED%95%B4_%EB%B6%80%EC%A1%B1.md)
 
 <p></p>
 
