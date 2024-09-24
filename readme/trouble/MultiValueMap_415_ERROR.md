@@ -1,5 +1,5 @@
 ## (1) 문제 상황
-> 로그인 통합 테스트 실행 중 `username`과 `password`를 `MultiValueMap`에 저장해 컨트롤러로 로그인을 요청하던 중 발생
+> 로그인 통합 테스트 실행 중 `username`과 `password`를 `MultiValueMap`에 저장해 컨트롤러로 로그인을 요청하던 중 발생 
 
 ## (2) 발생한 문제(에러)
 - ⓐ 최초 `💥NullPointerException`이 발생하면서 <u>"가입되지 않은 아이디"</u>라는 사용자 정의 에러 메시지가 전달됨 <p></p>
