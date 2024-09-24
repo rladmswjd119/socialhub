@@ -1,5 +1,5 @@
 ## 1. 문제 상황
-- JWT 토큰 발행을 위한 Secret Key 설정 중 발생
+- JWT 토큰 발행을 위한 Secret Key 설정 중 발생 
 
 ## 2. 발생한 문제(에러)
 >해당 에러 발생 : `io.jsonwebtoken.security.WeakKeyException`
